@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新人獵人手帳 • 《戀與深空》玩法與本命挑選指南</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');
+
+    :root {
+      --bg-cream: #FAF6F0;
+      --paper-cream: #F5EFE6;
+      --card-white: #FFFFFF;
+      --text-deep: #2B2521;
+      --text-charcoal: #48413C;
+      --text-muted: #7E7268;
+
+      /* 角色專屬莫蘭迪色盤 */
+      --c-xavier: #988DB5;
+      --c-zayne: #638EA9;
+      --c-rafayel: #DE8275;
+      --c-sylus: #9B585E;
+      --c-caleb: #A88665;
+    }
+
+    body {
+      background-color: var(--bg-cream);
+      color: var(--text-deep);
+      font-family: 'Zen Maru Gothic', -apple-system, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(#E5DAC5 1.2px, transparent 1.2px),
+        radial-gradient(#DACAB0 1.2px, transparent 1.2px);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
+    }
+
+    .serif-title {
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    /* 螢光劃線標記效果 */
+    .highlight-pink {
+      background: linear-gradient(180deg, transparent 50%, #FAD7D4 50%);
+      padding: 0 4px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .highlight-purple {
+      background: linear-gradient(180deg, transparent 50%, #E5DCF3 50%);
+      padding: 0 4px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .highlight-blue {
+      background: linear-gradient(180deg, transparent 50%, #D6E7F4 50%);
+      padding: 0 4px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .highlight-yellow {
+      background: linear-gradient(180deg, transparent 50%, #FAECD1 50%);
+      padding: 0 4px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+
+    /* 拍立得手帳卡片質感 */
+    .polaroid-card {
+      background: #FFFFFF;
+      border: 1.5px solid #EAE0D2;
+      box-shadow: 0 10px 28px -6px rgba(70, 55, 45, 0.08), 0 3px 10px -2px rgba(70, 55, 45, 0.04);
+      transition: all 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    .polaroid-card:hover {
+      transform: translateY(-5px) scale(1.015) !important;
+      box-shadow: 0 18px 36px -8px rgba(180, 120, 110, 0.18);
+      z-index: 25;
+    }
+
+    /* 紙膠帶貼紙 */
+    .deco-tape {
+      position: absolute;
+      width: 80px;
+      height: 22px;
+      opacity: 0.9;
+      backdrop-filter: blur(2px);
+      border-left: 2px dashed rgba(255, 255, 255, 0.7);
+      border-right: 2px dashed rgba(255, 255, 255, 0.7);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+      z-index: 10;
+    }
+    .tape-center { top: -11px; left: 50%; transform: translateX(-50%) rotate(-1deg); }
+    .tape-left { top: -9px; left: 24px; transform: rotate(-4deg); }
+    .tape-right { top: -9px; right: 24px; transform: rotate(3deg); }
+
+    /* 投影片滑動切換 */
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px) scale(0.99);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* 心動對話氣泡 */
+    .speech-bubble {
+      position: relative;
+      background: #FFFFFF;
+      border: 1.5px solid #E6D8C8;
+      border-radius: 12px;
+      padding: 7px 11px;
+    }
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 16px;
+      border-width: 6px 6px 0;
+      border-style: solid;
+      border-color: #FFFFFF transparent;
+      display: block;
+      width: 0;
+    }
+
+    #sparkleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.15); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.15); }
+      70% { transform: scale(1); }
+    }
+    .heart-pulse {
+      animation: heartBeat 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between selection:bg-[#FAD7D4] selection:text-[#48413C] min-h-screen">
+
+  <canvas id="sparkleCanvas"></canvas>
+
+  <!-- 頂部滿版導覽列 -->
+  <header class="relative z-30 border-b border-[#EAE0D2] bg-[#FAF6F0]/95 backdrop-blur-md px-6 lg:px-12 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl heart-pulse">💖</span>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-base md:text-lg font-black text-[#2B2521] serif-title tracking-wide">
+            《戀與深空》新人獵人入坑手帳
+          </h1>
+          <span class="px-2.5 py-0.5 rounded-full bg-[#FDF0ED] border border-[#DE8275]/40 text-[#DE8275] text-[11px] font-black">
+            玩法流程 × 本命男神指南
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <span id="slideIndicator" class="text-xs font-bold text-[#7E7268] bg-white px-3 py-1 rounded-full border border-[#E8DEC8] shadow-xs">
+        Page 1 / 6
+      </span>
+      <div class="flex space-x-2">
+        <button id="prevBtn" onclick="prevSlide()" class="px-4 py-1.5 rounded-full border border-[#D8CABE] bg-white hover:bg-[#F5EFE6] text-xs font-bold text-[#48413C] transition shadow-xs disabled:opacity-30 disabled:cursor-not-allowed">
+          ◀ 上一頁
+        </button>
+        <button id="nextBtn" onclick="nextSlide()" class="px-5 py-1.5 rounded-full bg-[#DE8275] hover:bg-[#CB7064] text-xs text-white font-black transition shadow-sm hover:shadow-md disabled:opacity-30 disabled:cursor-not-allowed">
+          翻下一頁 🌸
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 滿版主舞台容器 (Max width 1400px + 寬屏自適應排版) -->
+  <main class="relative z-10 flex-1 w-full max-w-[1400px] mx-auto px-6 lg:px-10 py-5 flex flex-col justify-center">
+
+    <!-- SLIDE 1: 封面與全景引導 -->
+    <section class="slide active flex-col items-center justify-center text-center space-y-6 w-full py-4">
+      <!-- 頂部膠囊列 -->
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <span class="px-3.5 py-1 rounded-full bg-[#F3EFF9] border border-[#D5CBE3] text-[#796D99] text-xs font-bold">
+          ⭐ 沈星回（光之聖劍 • 214年守候）
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-[#EAF3F9] border border-[#C5D9E7] text-[#4F7894] text-xs font-bold">
+          🩺 黎深（極寒冰霜 • 禁慾心外醫）
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-[#FDF0ED] border border-[#F4CCC4] text-[#C76457] text-xs font-bold">
+          🎨 祁煜（熾烈火燄 • 傲嬌海神）
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-[#F7EEEE] border border-[#DEC4C6] text-[#9B585E] text-xs font-bold">
+          👑 秦徹（能量支配 • 190cm暗點首領）
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-[#F6F1EA] border border-[#DECDBB] text-[#A88665] text-xs font-bold">
+          ✈️ 夏以晝（引力控制 • 偽骨科哥哥）
+        </span>
+      </div>
+
+      <!-- 標題與導讀 -->
+      <div class="space-y-3 max-w-4xl">
+        <h2 class="text-3xl md:text-5xl lg:text-6xl font-black text-[#2B2521] serif-title leading-tight">
+          新人獵人報到：<br>
+          <span class="bg-gradient-to-r from-[#DE8275] via-[#A87288] to-[#638EA9] bg-clip-text text-transparent">
+            進到遊戲後怎麼玩？如何挑選心動男主？
+          </span>
+        </h2>
+        <p class="text-sm md:text-lg text-[#6E645D] leading-relaxed max-w-3xl mx-auto">
+          打破新手初入臨空市的茫然！從<span class="highlight-pink">日常玩法循環</span>到<span class="highlight-yellow">雙人戰鬥破盾</span>，再到<span class="highlight-purple">五大男神反差萌深度速配</span>，一份手帳讓妳少走彎路、精準心動！
+        </p>
+      </div>
+
+      <!-- 三大引導拍立得卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full pt-2 text-left">
+        <div class="polaroid-card p-6 rounded-2xl md:rotate-[-1deg]">
+          <div class="deco-tape tape-center bg-[#E5DCF3]"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-[#988DB5] bg-[#F3EFF9] px-2.5 py-1 rounded-md">GUIDE 01</span>
+            <span class="text-xl">📑</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#2B2521] serif-title mb-2">
+            掌握【<span class="highlight-purple">核心玩法三支柱</span>】
+          </h3>
+          <p class="text-xs md:text-sm text-[#6E645D] leading-relaxed mb-3">
+            主線推進 ➔ 體力分配 ➔ 雙人日常約會。手把手帶妳建立新手期的黃金生活節奏，資源不浪費！
+          </p>
+          <div class="pt-2 border-t border-dashed border-[#EAE0D2] text-xs text-[#988DB5] font-bold">
+            💡 告別等級焦慮，輕鬆享受沉浸劇情！
+          </div>
+        </div>
+
+        <div class="polaroid-card p-6 rounded-2xl md:rotate-[1deg]">
+          <div class="deco-tape tape-center bg-[#FAD7D4]"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-[#DE8275] bg-[#FDF0ED] px-2.5 py-1 rounded-md">GUIDE 02</span>
+            <span class="text-xl">⚔️</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#2B2521] serif-title mb-2">
+            攜手【<span class="highlight-pink">戰鬥破盾最佳搭檔</span>】
+          </h3>
+          <p class="text-xs md:text-sm text-[#6E645D] leading-relaxed mb-3">
+            他不只是戀人，更是與妳背靠背釋放<span class="highlight-pink font-bold">共鳴技</span>與連攜大招的戰場生死伴侶！
+          </p>
+          <div class="pt-2 border-t border-dashed border-[#EAE0D2] text-xs text-[#DE8275] font-bold">
+            💡 搞懂光、冰、火、能量、引力的戰場定位！
+          </div>
+        </div>
+
+        <div class="polaroid-card p-6 rounded-2xl md:rotate-[-0.8deg]">
+          <div class="deco-tape tape-center bg-[#D6E7F4]"></div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-[#638EA9] bg-[#EAF3F9] px-2.5 py-1 rounded-md">GUIDE 03</span>
+            <span class="text-xl">💘</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#2B2521] serif-title mb-2">
+            戳中【<span class="highlight-blue">命定男神反差萌</span>】
+          </h3>
+          <p class="text-xs md:text-sm text-[#6E645D] leading-relaxed mb-3">
+            世人眼中的大人物，私底下卻只想把最甜、最真實的模樣留給妳。一鍵測驗找出命定人選！
+          </p>
+          <div class="pt-2 border-t border-dashed border-[#EAE0D2] text-xs text-[#638EA9] font-bold">
+            💡 靈魂速配機即刻連線，精準戳中萌點！
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="nextSlide()" class="px-8 py-3 rounded-full bg-[#DE8275] hover:bg-[#CB7064] text-white text-sm font-bold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+          翻開手帳，探索新手旅程 ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: 核心玩法循環 -->
+    <section class="slide flex-col space-y-4 w-full">
+      <div class="border-b border-[#EAE0D2] pb-2 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-black text-[#DE8275] tracking-widest uppercase bg-[#FDF0ED] px-2.5 py-0.5 rounded">PLAYTHROUGH LOOP</span>
+          <h2 class="text-2xl md:text-3xl font-black text-[#2B2521] serif-title mt-1">
+            核心玩法循環：進到遊戲後每天做什麼？三步建立黃金日常節奏
+          </h2>
+        </div>
+        <div class="text-xs text-[#7E7268] font-bold bg-white px-3 py-1 rounded-full border border-[#E8DEC8]">
+          ⏰ 新人必備每日進程表
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- 步驟 1 -->
+        <div class="polaroid-card p-5 rounded-2xl flex flex-col justify-between md:rotate-[-0.8deg]">
+          <div class="deco-tape tape-left bg-[#E5DCF3]"></div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-3 py-1 rounded-full bg-[#F3EFF9] text-[#796D99] text-xs font-bold">優先級 NO.1</span>
+              <span class="text-base">🚩</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-[#2B2521] serif-title mb-1.5">
+              Step 1 • 衝刺獵人等級，推進主線第一人稱劇情
+            </h3>
+            <p class="text-xs text-[#7E7268] mb-3 leading-relaxed">
+              沉浸式第一人稱體驗！所有男主邂逅、戰鬥功能與約會玩法，均隨主線章節逐步解鎖。
+            </p>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-[#FAF6F0] p-3 rounded-xl border border-[#EDE2D3]">
+                <strong class="text-[#796D99] block mb-1">📌 新人核心法則：</strong>
+                <p class="text-[#554C46] leading-relaxed">
+                  前期不要盲目卡關，卡等級時優先做<span class="highlight-purple font-bold">每日歷練日常任務</span>，經驗值豐厚，能最快突破等級門檻！
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#F0E6D8] text-xs text-[#796D99] font-bold">
+            💡 只要主線章節往前走，男主們的心動電話就會接連響起！
+          </div>
+        </div>
+
+        <!-- 步驟 2 -->
+        <div class="polaroid-card p-5 rounded-2xl flex flex-col justify-between md:rotate-[0.8deg]">
+          <div class="deco-tape tape-center bg-[#D6E7F4]"></div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-3 py-1 rounded-full bg-[#EAF3F9] text-[#4F7894] text-xs font-bold">戰力養成</span>
+              <span class="text-base">⚔️</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-[#2B2521] serif-title mb-1.5">
+              Step 2 • 雙人協同戰鬥，清空每日體力刷芯核
+            </h3>
+            <p class="text-xs text-[#7E7268] mb-3 leading-relaxed">
+              3D 實時動作手感，由男主充當妳的戰鬥護衛與破盾核心！體力是戰力成長的血液。
+            </p>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-[#FAF6F0] p-3 rounded-xl border border-[#EDE2D3]">
+                <strong class="text-[#4F7894] block mb-1">📌 新人核心法則：</strong>
+                <p class="text-[#554C46] leading-relaxed">
+                  體力滿 120 點立即刷<span class="highlight-blue font-bold">獵人委託與卡面升級材料</span>。前期專注拉滿 1~2 位心動男主的四星/五星日冕與月輝思念！
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#F0E6D8] text-xs text-[#4F7894] font-bold">
+            💡 男主的卡面等級直接加成女主角的攻擊防禦力！
+          </div>
+        </div>
+
+        <!-- 步驟 3 -->
+        <div class="polaroid-card p-5 rounded-2xl flex flex-col justify-between md:rotate-[-0.6deg]">
+          <div class="deco-tape tape-right bg-[#FAD7D4]"></div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="px-3 py-1 rounded-full bg-[#FDF0ED] text-[#C76457] text-xs font-bold">日常陪伴</span>
+              <span class="text-base">☕</span>
+            </div>
+            <h3 class="text-base md:text-lg font-bold text-[#2B2521] serif-title mb-1.5">
+              Step 3 • 心動日常，陪伴感才是深空的靈魂
+            </h3>
+            <p class="text-xs text-[#7E7268] mb-3 leading-relaxed">
+              不耗體力的純粹心動！每天和他在咖啡廳相處、抓娃娃機、打喵喵牌與定時陪伴。
+            </p>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-[#FAF6F0] p-3 rounded-xl border border-[#EDE2D3]">
+                <strong class="text-[#C76457] block mb-1">📌 新人核心法則：</strong>
+                <p class="text-[#554C46] leading-relaxed">
+                  每週更新的<span class="highlight-pink font-bold">抓娃娃機與喵喵牌</span>務必玩滿！不僅能解鎖他超可愛的私下賭氣語音，還能免費大幅提升牽絆好感度！
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-[#F0E6D8] text-xs text-[#C76457] font-bold">
+            💡 牽絆等級提升後，將解鎖他的專屬耳邊呢喃與洗腦鈴聲！
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部滿版提示小紙條 -->
+      <div class="polaroid-card p-3 rounded-xl border border-[#E8DFD3] text-xs text-[#6E645D] flex items-center justify-between bg-white">
+        <span class="font-bold text-[#DE8275]">🌟 新手防焦慮小語：</span>
+        <span>主線推進是為了看心動劇情，不必急於一天通關；陪伴是長久的，他一直在臨空市等妳。</span>
+        <span class="text-xs text-[#DE8275] font-bold">♥ 慢慢享受最好</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: 戰鬥與搭檔機制 (滿版圖鑑) -->
+    <section class="slide flex-col space-y-3.5 w-full">
+      <div class="border-b border-[#EAE0D2] pb-1.5 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-black text-[#638EA9] tracking-widest uppercase bg-[#EAF3F9] px-2.5 py-0.5 rounded">COMBAT PARTNER</span>
+          <h2 class="text-2xl md:text-3xl font-black text-[#2B2521] serif-title mt-0.5">
+            雙人並肩作戰：誰是妳的最佳戰鬥伴侶？五大 Evol 流派對照
+          </h2>
+        </div>
+        <span class="text-xs font-bold text-[#82776E] bg-white px-3 py-1 rounded-full border border-[#E8DEC8]">
+          ⚔️ 戰鬥搭檔圖鑑
+        </span>
+      </div>
+
+      <!-- 5 欄滿版戰鬥搭檔卡片 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <!-- 沈星回 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between border-t-4 border-[#988DB5]">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-base text-[#2B2521]">沈星回</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#F3EFF9] text-[#796D99] text-[10px] font-bold">Evol • 光</span>
+            </div>
+            <div class="text-xs font-bold text-[#796D99] mb-2">流派：【光之聖劍 • 靈巧破盾】</div>
+            
+            <div class="space-y-1.5 text-xs text-[#554C46]">
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">作戰風格</span>
+                <span class="font-bold text-[#2B2521]">高頻光劍斬擊、瞬移突刺</span>
+              </div>
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">共鳴技特性</span>
+                <span class="font-medium text-[11px]">大範圍強效破盾、輕靈手感</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-[#EDE2D3] text-[11px] text-[#796D99] font-bold">
+            🎯 推薦給：喜歡靈巧身法、高速連攜斬擊的敏捷系玩家！
+          </div>
+        </div>
+
+        <!-- 黎深 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between border-t-4 border-[#638EA9]">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-base text-[#2B2521]">黎深</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#EAF3F9] text-[#4F7894] text-[10px] font-bold">Evol • 冰</span>
+            </div>
+            <div class="text-xs font-bold text-[#4F7894] mb-2">流派：【極寒冰霜 • 控場防護】</div>
+            
+            <div class="space-y-1.5 text-xs text-[#554C46]">
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">作戰風格</span>
+                <span class="font-bold text-[#2B2521]">遠程冰棱穿透、冰凍定身</span>
+              </div>
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">共鳴技特性</span>
+                <span class="font-medium text-[11px]">強效群體冰凍、提供防禦護盾</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-[#EDE2D3] text-[11px] text-[#4F7894] font-bold">
+            🎯 推薦給：需要極致安全感、怕被打斷施法的穩健系玩家！
+          </div>
+        </div>
+
+        <!-- 祁煜 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between border-t-4 border-[#DE8275]">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-base text-[#2B2521]">祁煜</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#FDF0ED] text-[#C76457] text-[10px] font-bold">Evol • 火</span>
+            </div>
+            <div class="text-xs font-bold text-[#C76457] mb-2">流派：【熾烈火燄 • 聚怪爆燃】</div>
+            
+            <div class="space-y-1.5 text-xs text-[#554C46]">
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">作戰風格</span>
+                <span class="font-bold text-[#2B2521]">火蝶迴旋、焰尾群體灼燒</span>
+              </div>
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">共鳴技特性</span>
+                <span class="font-medium text-[11px]">大範圍聚怪、全屏火系爆裂群傷</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-[#EDE2D3] text-[11px] text-[#C76457] font-bold">
+            🎯 推薦給：喜歡滿屏華麗特效、享受清場快感的群傷愛好者！
+          </div>
+        </div>
+
+        <!-- 秦徹 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between border-t-4 border-[#9B585E]">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-base text-[#2B2521]">秦徹</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#F7EEEE] text-[#9B585E] text-[10px] font-bold">Evol • 能量</span>
+            </div>
+            <div class="text-xs font-bold text-[#9B585E] mb-2">流派：【能量支配 • 霸道重擊】</div>
+            
+            <div class="space-y-1.5 text-xs text-[#554C46]">
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">作戰風格</span>
+                <span class="font-bold text-[#2B2521]">重裝近戰、衝擊波霸體擊飛</span>
+              </div>
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">共鳴技特性</span>
+                <span class="font-medium text-[11px]">狂暴能量傾瀉、強行破除霸體</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-[#EDE2D3] text-[11px] text-[#9B585E] font-bold">
+            🎯 推薦給：喜歡拳拳到肉、碾壓式重擊快感的戰鬥狂熱者！
+          </div>
+        </div>
+
+        <!-- 夏以晝 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between border-t-4 border-[#A88665]">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-base text-[#2B2521]">夏以晝</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#F6F1EA] text-[#A88665] text-[10px] font-bold">Evol • 引力</span>
+            </div>
+            <div class="text-xs font-bold text-[#A88665] mb-2">流派：【引力控制 • 空間牽引】</div>
+            
+            <div class="space-y-1.5 text-xs text-[#554C46]">
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">作戰風格</span>
+                <span class="font-bold text-[#2B2521]">重力場壓制、空間斥力打擊</span>
+              </div>
+              <div class="bg-[#FAF6F0] p-2 rounded-lg">
+                <span class="text-[#7E7268] text-[10px] block">共鳴技特性</span>
+                <span class="font-medium text-[11px]">強力空間黑洞牽引、戰局絕對掌控</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-[#EDE2D3] text-[11px] text-[#A88665] font-bold">
+            🎯 推薦給：偏好戰略牽制、把敵人玩弄於股掌間的戰術控！
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部流派總結條 -->
+      <div class="polaroid-card p-3 rounded-2xl flex items-center justify-between bg-white text-xs">
+        <span class="font-bold text-[#DE8275]">💡 雙人作戰心得：</span>
+        <span>副本怪物有護盾屬性弱點，出戰前先看推薦屬性（光/冰/火/能量/引力），選對男主共鳴技破盾速度翻倍！</span>
+        <span class="text-xs text-[#7E7268] font-mono">Resonance Ready ✓</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: 靈魂挑選：反差萌暴擊 -->
+    <section class="slide flex-col space-y-3.5 w-full">
+      <div class="border-b border-[#EAE0D2] pb-1.5 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-black text-[#988DB5] tracking-widest uppercase bg-[#F3EFF9] px-2.5 py-0.5 rounded">GAP MOE</span>
+          <h2 class="text-2xl md:text-3xl font-black text-[#2B2521] serif-title mt-0.5">
+            靈魂挑選：世人眼中的大人物 vs. 只有妳知道的私下反差萌
+          </h2>
+        </div>
+        <span class="text-xs font-bold text-[#82776E] bg-white px-3 py-1 rounded-full border border-[#E8DEC8]">
+          ⚡ 心動暴擊台詞
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 沈星回 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between bg-white">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-full bg-[#F3EFF9] text-[#796D99] font-bold flex items-center justify-center text-xs">星</span>
+                <span class="font-bold text-base text-[#2B2521]">沈星回</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 bg-[#F3EFF9] text-[#796D99] rounded-full">軟萌白兔 × 聖劍騎士</span>
+            </div>
+            <div class="text-xs text-[#554C46] space-y-1.5">
+              <div>🛡️ <strong>公眾</strong>：手持聖劍、在地球守護了 214 個春天的無敵光獵。</div>
+              <div>🐰 <strong>私下反差</strong>：站著也能睡著（<span class="highlight-purple">沈醒會兒</span>），愛吃零食，私下超級沉迷打主機遊戲和在夾娃娃機前較勁！</div>
+            </div>
+          </div>
+          <div class="speech-bubble mt-3 text-xs text-[#796D99] font-medium bg-[#FAF7FC]">
+            💭 「要是抓不到這隻兔子，今天就不回去了……妳陪我一起。」
+          </div>
+        </div>
+
+        <!-- 黎深 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between bg-white">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-full bg-[#EAF3F9] text-[#4F7894] font-bold flex items-center justify-center text-xs">深</span>
+                <span class="font-bold text-base text-[#2B2521]">黎深</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 bg-[#EAF3F9] text-[#4F7894] rounded-full">白袍禁慾 × 爹系人夫</span>
+            </div>
+            <div class="text-xs text-[#554C46] space-y-1.5">
+              <div>🩺 <strong>公眾</strong>：史上最年輕摘星醫學獎心外副主任，清冷克制。</div>
+              <div>❄️ <strong>私下反差</strong>：超喜歡毛茸茸小動物、面無表情一本正經講<span class="highlight-blue">冷笑話</span>，對妳的生活作息嘮叨卻滿溢安全感！</div>
+            </div>
+          </div>
+          <div class="speech-bubble mt-3 text-xs text-[#4F7894] font-medium bg-[#F5F9FC]">
+            💭 「體溫 36.8 度。今天要是敢少吃一口飯，明天門診見。」
+          </div>
+        </div>
+
+        <!-- 祁煜 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between bg-white">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-full bg-[#FDF0ED] text-[#C76457] font-bold flex items-center justify-center text-xs">煜</span>
+                <span class="font-bold text-base text-[#2B2521]">祁煜</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 bg-[#FDF0ED] text-[#C76457] rounded-full">傲嬌神明 × 易紅臉海神</span>
+            </div>
+            <div class="text-xs text-[#554C46] space-y-1.5">
+              <div>🎨 <strong>公眾</strong>：利莫里亞海神、享譽世界的白沙灣畫廊天才創始人。</div>
+              <div>🐡 <strong>私下反差</strong>：嘴硬愛撒嬌，只要妳真誠盯著他誇一句，整張臉<span class="highlight-pink">秒熟成紅富士蘋果</span>！身為海神卻天天惦記吃海鮮！</div>
+            </div>
+          </div>
+          <div class="speech-bubble mt-3 text-xs text-[#C76457] font-medium bg-[#FFF7F5]">
+            💭 「誰、誰臉紅了！明明是陽光太刺眼……妳別靠這麼近啦！」
+          </div>
+        </div>
+
+        <!-- 秦徹 -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between bg-white">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-full bg-[#F7EEEE] text-[#9B585E] font-bold flex items-center justify-center text-xs">徹</span>
+                <span class="font-bold text-base text-[#2B2521]">秦徹</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 bg-[#F7EEEE] text-[#9B585E] rounded-full">190黑道大佬 × 明騷縱容</span>
+            </div>
+            <div class="text-xs text-[#554C46] space-y-1.5">
+              <div>👑 <strong>公眾</strong>：N109區暗點首領，黑白兩道懼怕、手握殺伐大權的梟雄。</div>
+              <div>🖤 <strong>私下反差</strong>：眼神帶電的<span class="highlight-yellow">明騷大佬</span>，以太之眼看穿一切卻專用來縱容妳，手槍與通行證任妳隨意拿！</div>
+            </div>
+          </div>
+          <div class="speech-bubble mt-3 text-xs text-[#9B585E] font-medium bg-[#FCF8F8]">
+            💭 「這把槍送妳防身。在我的地盤，只要妳想，沒有妳不能做的事。」
+          </div>
+        </div>
+
+        <!-- 夏以晝 (跨兩欄排版更具張力) -->
+        <div class="polaroid-card p-4 rounded-2xl flex flex-col justify-between bg-white md:col-span-2">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <span class="w-8 h-8 rounded-full bg-[#F6F1EA] text-[#A88665] font-bold flex items-center justify-center text-xs">晝</span>
+                <span class="font-bold text-base text-[#2B2521]">夏以晝</span>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 bg-[#F6F1EA] text-[#A88665] rounded-full">陽光戰機飛行員 × 陰濕男鬼獨佔欲</span>
+            </div>
+            <div class="text-xs text-[#554C46] space-y-1.5">
+              <div>✈️ <strong>公眾</strong>：帥氣沉著的 DAA 飛行員、遠空艦隊執艦官，永遠笑得溫柔可靠的青梅竹馬好哥哥。</div>
+              <div>🥀 <strong>私下反差</strong>：機械右臂（<span class="highlight-yellow">僅能感知超閾值痛覺</span>）藏著蓋亞中心 002 號供體的殘酷實驗創傷；背負著替妳承受爆炸危機的沉重秘密，表面溫柔，內心卻是極具壓迫感的「妹控陰濕男鬼」！</div>
+            </div>
+          </div>
+          <div class="speech-bubble mt-3 text-xs text-[#A88665] font-medium bg-[#FAF7F2]">
+            💭 「我是妳的哥哥……但如果妳想逃走，我會親手毀掉所有出口。」
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: 趣味互動！心動速配機 -->
+    <section class="slide flex-col space-y-4 w-full">
+      <div class="border-b border-[#EAE0D2] pb-1.5 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-black text-[#DE8275] tracking-widest uppercase bg-[#FDF0ED] px-2.5 py-0.5 rounded">SOULMATE TEST</span>
+          <h2 class="text-2xl md:text-3xl font-black text-[#2B2521] serif-title mt-0.5">
+            新人命定男主速配機：點選妳最抗拒不了的萌點！
+          </h2>
+        </div>
+        <div class="text-xs font-bold text-[#DE8275] bg-white px-3 py-1 rounded-full border border-[#DE8275]/40 heart-pulse">
+          ♥ 點擊下方標籤即刻配對
+        </div>
+      </div>
+
+      <!-- 標籤按鈕群 -->
+      <div class="flex flex-wrap gap-2.5 text-xs">
+        <button onclick="filterMatch('all')" class="filter-btn active px-4 py-2 rounded-full bg-[#DE8275] text-white font-bold shadow-xs transition">
+          全部候選人（5位）
+        </button>
+        <button onclick="filterMatch('husband')" class="filter-btn px-4 py-2 rounded-full bg-white text-[#5E544D] font-bold border border-[#E8DFD3] hover:border-[#638EA9] transition shadow-xs">
+          #新手保姆極致人夫
+        </button>
+        <button onclick="filterMatch('natural')" class="filter-btn px-4 py-2 rounded-full bg-white text-[#5E544D] font-bold border border-[#E8DFD3] hover:border-[#988DB5] transition shadow-xs">
+          #安靜陪伴戰神小狗
+        </button>
+        <button onclick="filterMatch('tsundere')" class="filter-btn px-4 py-2 rounded-full bg-white text-[#5E544D] font-bold border border-[#E8DFD3] hover:border-[#DE8275] transition shadow-xs">
+          #推拉曖昧傲嬌浪漫
+        </button>
+        <button onclick="filterMatch('dopamine')" class="filter-btn px-4 py-2 rounded-full bg-white text-[#5E544D] font-bold border border-[#E8DFD3] hover:border-[#9B585E] transition shadow-xs">
+          #極致偏愛無條件縱容
+        </button>
+        <button onclick="filterMatch('yandere')" class="filter-btn px-4 py-2 rounded-full bg-white text-[#5E544D] font-bold border border-[#E8DFD3] hover:border-[#A88665] transition shadow-xs">
+          #虐戀情深禁忌骨科
+        </button>
+      </div>
+
+      <!-- 5 欄高度飽滿速配卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="matchCardsContainer">
+        <!-- 黎深 -->
+        <div data-cat="husband" class="match-card polaroid-card p-4 rounded-2xl flex flex-col justify-between transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#638EA9]"></span>
+              <span class="text-[11px] text-[#4F7894] font-bold bg-[#EAF3F9] px-2 py-0.5 rounded-full">黎深</span>
+            </div>
+            <div class="text-sm font-bold text-[#2B2521] mt-1 serif-title">禁慾白袍 × 爹系人夫</div>
+            <p class="mt-2 text-xs text-[#6E645D] leading-relaxed">
+              適合喜歡<strong>生活被照顧得周全妥帖、看他邊講冷笑話邊給妳掖被角</strong>的安全感沉迷者！
+            </p>
+            <div class="mt-3 p-2 bg-[#FAF6F0] rounded-xl text-[11px] text-[#4F7894] font-medium">
+              ✨ 必殺技：用戴著手套的手指輕輕貼上妳額頭測溫。
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-dashed border-[#EAE0D2] text-[11px] text-[#4F7894] font-bold flex justify-between">
+            <span>💘 契合指數</span>
+            <span>99.9%</span>
+          </div>
+        </div>
+
+        <!-- 沈星回 -->
+        <div data-cat="natural" class="match-card polaroid-card p-4 rounded-2xl flex flex-col justify-between transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#988DB5]"></span>
+              <span class="text-[11px] text-[#796D99] font-bold bg-[#F3EFF9] px-2 py-0.5 rounded-full">沈星回</span>
+            </div>
+            <div class="text-sm font-bold text-[#2B2521] mt-1 serif-title">毛絨小奶兔 × 第一戰神</div>
+            <p class="mt-2 text-xs text-[#6E645D] leading-relaxed">
+              適合喜歡<strong>安靜陪伴、外表軟乎乎無害，但隨時能拔劍守護妳一生</strong>的忠誠騎士控！
+            </p>
+            <div class="mt-3 p-2 bg-[#FAF6F0] rounded-xl text-[11px] text-[#796D99] font-medium">
+              ✨ 必殺技：在妳耳邊迷糊地說想再多睡五分鐘。
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-dashed border-[#EAE0D2] text-[11px] text-[#796D99] font-bold flex justify-between">
+            <span>💘 契合指數</span>
+            <span>99.9%</span>
+          </div>
+        </div>
+
+        <!-- 祁煜 -->
+        <div data-cat="tsundere" class="match-card polaroid-card p-4 rounded-2xl flex flex-col justify-between transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#DE8275]"></span>
+              <span class="text-[11px] text-[#C76457] font-bold bg-[#FDF0ED] px-2 py-0.5 rounded-full">祁煜</span>
+            </div>
+            <div class="text-sm font-bold text-[#2B2521] mt-1 serif-title">傲嬌海神 × 易熟紅富士</div>
+            <p class="mt-2 text-xs text-[#6E645D] leading-relaxed">
+              適合喜歡<strong>言語推拉情趣、逗他一句就害羞炸毛、把所有浪漫藝術奉獻給妳</strong>的推拉大師！
+            </p>
+            <div class="mt-3 p-2 bg-[#FAF6F0] rounded-xl text-[11px] text-[#C76457] font-medium">
+              ✨ 必殺技：耳尖通紅卻偏要轉頭嘴硬裝作沒事。
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-dashed border-[#EAE0D2] text-[11px] text-[#C76457] font-bold flex justify-between">
+            <span>💘 契合指數</span>
+            <span>99.9%</span>
+          </div>
+        </div>
+
+        <!-- 秦徹 -->
+        <div data-cat="dopamine" class="match-card polaroid-card p-4 rounded-2xl flex flex-col justify-between transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#9B585E]"></span>
+              <span class="text-[11px] text-[#9B585E] font-bold bg-[#F7EEEE] px-2 py-0.5 rounded-full">秦徹</span>
+            </div>
+            <div class="text-sm font-bold text-[#2B2521] mt-1 serif-title">190黑道大佬 × 明騷縱容</div>
+            <p class="mt-2 text-xs text-[#6E645D] leading-relaxed">
+              適合喜歡<strong>濃烈荷爾蒙、高位者只對妳低頭妥協、要槍給槍要命給命</strong>的頂級霸總愛好者！
+            </p>
+            <div class="mt-3 p-2 bg-[#FAF6F0] rounded-xl text-[11px] text-[#9B585E] font-medium">
+              ✨ 必殺技：以太之眼看穿妳所有心思，卻只笑著誇妳可愛。
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-dashed border-[#EAE0D2] text-[11px] text-[#9B585E] font-bold flex justify-between">
+            <span>💘 契合指數</span>
+            <span>99.9%</span>
+          </div>
+        </div>
+
+        <!-- 夏以晝 -->
+        <div data-cat="yandere" class="match-card polaroid-card p-4 rounded-2xl flex flex-col justify-between transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#A88665]"></span>
+              <span class="text-[11px] text-[#A88665] font-bold bg-[#F6F1EA] px-2 py-0.5 rounded-full">夏以晝</span>
+            </div>
+            <div class="text-sm font-bold text-[#2B2521] mt-1 serif-title">飛行員哥哥 × 陰濕男鬼</div>
+            <p class="mt-2 text-xs text-[#6E645D] leading-relaxed">
+              適合喜歡<strong>偽骨科、虐戀情深、童年悲情創傷與逃不掉的沉重佔有欲</strong>的虐文愛好者！
+            </p>
+            <div class="mt-3 p-2 bg-[#FAF6F0] rounded-xl text-[11px] text-[#A88665] font-medium">
+              ✨ 必殺技：機械臂只能感知劇痛，卻只用它緊緊抱住妳。
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-dashed border-[#EAE0D2] text-[11px] text-[#A88665] font-bold flex justify-between">
+            <span>💘 契合指數</span>
+            <span>99.9%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: 新手建議與維基傳送門 -->
+    <section class="slide flex-col items-center justify-center text-center space-y-4 w-full py-2">
+      <div class="w-14 h-14 rounded-full bg-[#FDF0ED] border-2 border-[#DE8275] text-[#DE8275] flex items-center justify-center text-3xl heart-pulse shadow-xs">
+        💖
+      </div>
+
+      <div class="space-y-1.5 max-w-2xl">
+        <h2 class="text-2xl md:text-4xl font-black text-[#2B2521] serif-title">
+          心動不需要猶豫，臨空市永遠有他的等待！
+        </h2>
+        <p class="text-sm md:text-base text-[#6E645D] leading-relaxed">
+          每一次戰場上的並肩、每一通深夜的電話，都見證著妳們專屬的故事。<br>
+          本手帳已同步永久收錄於知識庫，隨時歡迎妳回來翻閱！
+        </p>
+      </div>
+
+      <!-- 寬屏維基傳送門桌面 -->
+      <div class="polaroid-card p-6 rounded-2xl text-left max-w-3xl w-full text-xs space-y-3 relative md:rotate-[0.3deg]">
+        <div class="deco-tape tape-center bg-[#FAD7D4]"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 左側：避坑指南 -->
+          <div class="space-y-2 border-r border-[#EDE2D3] pr-3">
+            <div class="font-bold text-sm text-[#2B2521] mb-1">💡 新人四大不踩坑心法：</div>
+            <div class="text-[#6E645D] space-y-1 text-[11px]">
+              <div>1. <strong>前期資源極限專一</strong>：先拉拔 1~2 位本命的高星卡。</div>
+              <div>2. <strong>體力千萬不要溢出</strong>：睡前記得清空刷芯核材料。</div>
+              <div>3. <strong>每週娃娃機玩好玩滿</strong>：免費牽絆好感度的主要途徑。</div>
+              <div>4. <strong>享受劇情不要焦慮</strong>：第一人稱沉浸體驗才是王道！</div>
+            </div>
+          </div>
+
+          <!-- 右側：維基檔案通道 -->
+          <div class="space-y-1.5 pl-1">
+            <div class="font-bold text-sm text-[#2B2521] mb-1">📂 維基專屬檔案快速傳送門：</div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px] text-[#6E645D]">
+              <div class="p-1.5 rounded-lg bg-[#FAF6F0] hover:bg-[#F3EFF9] transition border border-[#EDE2D3]">
+                ⭐ <strong>沈星回</strong>：<span class="text-[#796D99] font-bold">characters/沈星回/</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-[#FAF6F0] hover:bg-[#EAF3F9] transition border border-[#EDE2D3]">
+                🩺 <strong>黎深</strong>：<span class="text-[#4F7894] font-bold">characters/黎深/</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-[#FAF6F0] hover:bg-[#FDF0ED] transition border border-[#EDE2D3]">
+                🎨 <strong>祁煜</strong>：<span class="text-[#C76457] font-bold">characters/祁煜/</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-[#FAF6F0] hover:bg-[#F7EEEE] transition border border-[#EDE2D3]">
+                👑 <strong>秦徹</strong>：<span class="text-[#9B585E] font-bold">characters/秦徹/</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-[#FAF6F0] hover:bg-[#F6F1EA] transition border border-[#EDE2D3] col-span-2">
+                ✈️ <strong>夏以晝</strong>：<span class="text-[#A88665] font-bold">characters/夏以晝/</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex space-x-4">
+        <button onclick="goToSlide(0)" class="px-6 py-2.5 rounded-full border border-[#D8CABE] bg-white hover:bg-[#F5EFE6] text-xs font-bold text-[#48413C] transition shadow-xs">
+          ↺ 重新翻閱首頁
+        </button>
+        <button onclick="goToSlide(4)" class="px-7 py-2.5 rounded-full bg-[#DE8275] hover:bg-[#CB7064] text-xs font-black text-white transition shadow-sm hover:shadow-md">
+          🎯 再測一次命中男神！
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 底部翻頁標籤 -->
+  <footer class="relative z-30 border-t border-[#EAE0D2] bg-[#FAF6F0]/90 backdrop-blur-md px-6 py-3 flex items-center justify-center space-x-2">
+    <button onclick="goToSlide(0)" class="dot w-2 h-2 rounded-full bg-[#DE8275] transition-all"></button>
+    <button onclick="goToSlide(1)" class="dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all"></button>
+    <button onclick="goToSlide(2)" class="dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all"></button>
+    <button onclick="goToSlide(3)" class="dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all"></button>
+    <button onclick="goToSlide(4)" class="dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all"></button>
+    <button onclick="goToSlide(5)" class="dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all"></button>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const indicator = document.getElementById('slideIndicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      dots.forEach((d, idx) => {
+        if (idx === currentSlide) {
+          d.className = 'dot w-6 h-2 rounded-full bg-[#DE8275] transition-all';
+        } else {
+          d.className = 'dot w-2 h-2 rounded-full bg-[#D8CABE] transition-all';
+        }
+      });
+
+      indicator.textContent = `Page ${currentSlide + 1} / ${slides.length}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = n;
+      updateSlide();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    function filterMatch(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-[#DE8275]', 'text-white');
+        btn.classList.add('bg-white', 'text-[#5E544D]');
+      });
+      event.target.classList.remove('bg-white', 'text-[#5E544D]');
+      event.target.classList.add('bg-[#DE8275]', 'text-white');
+
+      const cards = document.querySelectorAll('.match-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-cat') === category) {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(-6px) scale(1.03)';
+          card.style.boxShadow = '0 16px 32px -4px rgba(222, 130, 117, 0.28)';
+          card.classList.add('border-[#DE8275]', 'bg-[#FFFDFB]');
+        } else {
+          card.style.opacity = '0.28';
+          card.style.transform = 'scale(0.96)';
+          card.style.boxShadow = 'none';
+          card.classList.remove('border-[#DE8275]', 'bg-[#FFFDFB]');
+        }
+      });
+    }
+
+    // 漂浮微星光粒子畫布
+    const canvas = document.getElementById('sparkleCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const colors = ['rgba(222, 130, 117, 0.45)', 'rgba(152, 141, 181, 0.45)', 'rgba(99, 142, 169, 0.45)', 'rgba(168, 134, 101, 0.45)'];
+
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2.5 + 1.2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4
+      });
+    }
+
+    function renderSparkles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+      });
+      requestAnimationFrame(renderSparkles);
+    }
+    renderSparkles();
+
+    updateSlide();
+  </script>
+</body>
+</html>
